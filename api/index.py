@@ -1,20 +1,21 @@
+from flask import Flask, render_template, request
+import numpy as np
+import joblib
 import os
 
-import joblib
-import numpy as np
-from flask import Flask, render_template, request
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 app = Flask(
     __name__,
-    template_folder="../templates",
-    static_folder="../static"
+    template_folder=os.path.join(BASE_DIR, "templates"),
+    static_folder=os.path.join(BASE_DIR, "static")
 )
 
-model = joblib.load(os.path.join(os.path.dirname(__file__), "../model.pkl"))
-scaler = joblib.load(os.path.join(os.path.dirname(__file__), "../scaler.pkl"))
+model = joblib.load(os.path.join(BASE_DIR, "model.pkl"))
+scaler = joblib.load(os.path.join(BASE_DIR, "scaler.pkl"))
 
 @app.route("/", methods=["GET", "POST"])
-def index():
+def home():
     prediction = None
     confidence = None
 
@@ -43,5 +44,6 @@ def index():
         confidence=confidence
     )
 
-# Vercel needs this
-app = app
+# 👇 REQUIRED for Vercel
+def handler(environ, start_response):
+    return app(environ, start_response)
